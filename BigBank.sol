@@ -9,10 +9,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+
+interface IBank {
+    function withdraw(uint256 _amount)external payable ;
+    }
+
 contract Bank{
     address internal  admin;
     mapping (address => uint256) internal amounts;
-    address [3]  internal    top3;
+    address [3]  internal   top3;
 
     constructor() payable {
         admin = msg.sender;
@@ -87,16 +92,17 @@ contract Bank{
 // Write the withdraw() method, and only the administrator can withdraw funds through this method.
 // Use an array to record the top 3 users with deposit amounts
 
-contract BigBank is Bank{   
+
+// 题目的意思我没有很理解。按照我的理解，
+//BigBank将管理员权限托管给Ownable，Ownable的管理员是实际的管理员，Ownable支持更换管理员，BigBank只接受Ownable的调用。
 
 
+contract BigBank is Bank, IBank{   
 
     modifier GT0_001ETH(){
         require(msg.value>= 1e15, "Deposit needs greater than 0.001 ether");
         _;
     }
-
-
 
     //override for Only accept >0.001ether deposit
     receive() external override payable GT0_001ETH{ 
@@ -104,20 +110,21 @@ contract BigBank is Bank{
         comparator(msg.sender);
     }
 
-    // transfer admin
-    function transferAdmin(address _newAdmin) virtual public OnlyAdmin{
-        admin = _newAdmin;
+    // 只有Ownable可以调用
+    modifier OnlyOwnable(){
+        // 这里先部署ownable
+        require(msg.sender==address(0x3d33C01bCC36ac6A8f872599A9c9351c11Ef07E7),"Withdraw can only be manipulated By Ownable.");
+        _;
+    }
+
+    function withdraw(uint256 _amount)external   override(Bank, IBank)  payable OnlyOwnable{
+        require(_amount<= address(this).balance, "Not enough balance");
+        payable (msg.sender).transfer(_amount);
+
+
     }
 
 }
 
-contract Ownable is BigBank{
 
-    constructor() payable {
-        admin = address(this);
-    }
 
-    function showAdmin() public view returns (address){
-        return admin;
-    }
-}
