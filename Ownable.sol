@@ -20,12 +20,12 @@ contract Ownable{
     }
 
     // transfer admin
-    function transferAdmin(address _newAdmin) public OnlyAdmin{
+    function setAdmin(address _newAdmin) public OnlyAdmin{
         admin = _newAdmin;
     }
 
-    function withdraw(address _bigbank,uint256 _amounts) payable public OnlyAdmin {
+    function withdraw(address _bigbank,uint256 _amounts)  public OnlyAdmin {
         IBank(_bigbank).withdraw(_amounts);
     }
 
-}
+}   

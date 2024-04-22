@@ -110,14 +110,11 @@ contract BigBank is Bank, IBank{
         comparator(msg.sender);
     }
 
-    // 只有Ownable可以调用
-    modifier OnlyOwnable(){
-        // 这里先部署ownable
-        require(msg.sender==address(0x3d33C01bCC36ac6A8f872599A9c9351c11Ef07E7),"Withdraw can only be manipulated By Ownable.");
-        _;
+    function transferAdmin(address _newadmin)public OnlyAdmin{
+        admin = _newadmin;
     }
 
-    function withdraw(uint256 _amount)external   override(Bank, IBank)  payable OnlyOwnable{
+    function withdraw(uint256 _amount)external   override(Bank, IBank)  payable OnlyAdmin{
         require(_amount<= address(this).balance, "Not enough balance");
         payable (msg.sender).transfer(_amount);
 
